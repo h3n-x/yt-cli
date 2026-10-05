@@ -28,8 +28,8 @@ optdepends=(
     'fish: autocompletado en fish'
 )
 # Aún no hay releases/tags publicados: se compila desde el árbol local del
-# repositorio. Funciona tanto con `cd packaging && makepkg -si` como con
-# `makepkg -si -p packaging/PKGBUILD` desde la raíz (README y CI).
+# repositorio: `cd packaging && makepkg -si` (makepkg exige que el PKGBUILD
+# esté en el directorio actual; `-p packaging/PKGBUILD` desde la raíz falla).
 # Cuando exista el tag v$pkgver, sustituir por:
 #   source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
 #   sha256sums=('<sha256 real>')

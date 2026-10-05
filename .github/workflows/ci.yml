@@ -80,9 +80,10 @@ jobs:
           echo 'builder ALL=(ALL) NOPASSWD: /usr/bin/pacman' > /etc/sudoers.d/builder
           chown -R builder:builder .
       - name: makepkg con dependencias y check()
-        run: su builder -c "cd '$PWD' && makepkg -s --noconfirm -f -p packaging/PKGBUILD"
+        # makepkg exige que el PKGBUILD esté en el directorio actual.
+        run: su builder -c "cd '$PWD/packaging' && makepkg -s --noconfirm -f"
       - name: Instalar el paquete y probarlo
         run: |
-          pacman -U --noconfirm packaging/*.pkg.tar.zst || pacman -U --noconfirm ./*.pkg.tar.zst
+          pacman -U --noconfirm packaging/*.pkg.tar.zst
           yt-cli --version
           yt-cli doctor || true
