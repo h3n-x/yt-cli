@@ -27,13 +27,14 @@ optdepends=(
     'fish: autocompletado en fish'
 )
 # Aún no hay releases/tags publicados: se compila desde el árbol local del
-# repositorio (el directorio padre de packaging/). Ejecutar `makepkg -si`
-# desde yt-cli/packaging.
+# repositorio. Funciona tanto con `cd packaging && makepkg -si` como con
+# `makepkg -si -p packaging/PKGBUILD` desde la raíz (README y CI).
 source=()
 sha256sums=()
 
 prepare() {
-    local _root="$startdir/.."
+    local _root="$startdir"
+    [[ -f "$_root/pyproject.toml" ]] || _root="$startdir/.."
     rm -rf "$srcdir/$pkgname-$pkgver"
     mkdir -p "$srcdir/$pkgname-$pkgver/packaging"
     cp -a "$_root"/{src,tests,docs,pyproject.toml,README.md,CHANGELOG.md,LICENSE} \
