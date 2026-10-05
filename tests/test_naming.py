@@ -1,4 +1,8 @@
-from yt_cli.utils.naming import render_filename_template, sanitize_filename, sanitize_path_template_output
+from yt_cli.utils.naming import (
+    render_filename_template,
+    sanitize_filename,
+    sanitize_path_template_output,
+)
 
 
 class TestSanitizeFilename:

@@ -43,7 +43,9 @@ def _request(
 class TestRetryBackoff:
     """Corrige la ausencia de reintentos inteligentes (phase_8, prioridad #3)."""
 
-    @pytest.mark.parametrize(("kind", "ceiling"), [("http", 60), ("fragment", 30), ("file_access", 10)])
+    @pytest.mark.parametrize(
+        ("kind", "ceiling"), [("http", 60), ("fragment", 30), ("file_access", 10)]
+    )
     def test_backoff_is_bounded(self, kind: str, ceiling: int) -> None:
         func = _RETRY_SLEEP_FUNCTIONS[kind]
         assert all(func(n) <= ceiling for n in range(20))
@@ -57,7 +59,9 @@ class TestRetryBackoff:
 
 class TestMapProgress:
     def test_percent_computed_from_bytes(self) -> None:
-        event = _map_yt_dlp_progress({"status": "downloading", "downloaded_bytes": 25, "total_bytes": 100})
+        event = _map_yt_dlp_progress(
+            {"status": "downloading", "downloaded_bytes": 25, "total_bytes": 100}
+        )
         assert event.percent == 25.0
 
     def test_missing_total_bytes_has_no_percent(self) -> None:
@@ -90,7 +94,9 @@ class TestBuildYdlOpts:
     def test_no_dead_nooverwrites_key(self, tmp_path: Path) -> None:
         """B1: la clave 'nooverwrites' no existe en yt_dlp.YoutubeDL; se retiró."""
         downloader = YtDlpDownloader()
-        opts = downloader._build_ydl_opts(_request(tmp_path, overwrite_policy=OverwritePolicy.SKIP), None)
+        opts = downloader._build_ydl_opts(
+            _request(tmp_path, overwrite_policy=OverwritePolicy.SKIP), None
+        )
         assert "nooverwrites" not in opts
         assert opts["overwrites"] is False
 

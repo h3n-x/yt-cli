@@ -58,9 +58,8 @@ class TestExclusiveLock:
         time.sleep(0.05)  # asegura que 'holder' ya tomó el lock
 
         try:
-            with pytest.raises(TimeoutError):
-                with exclusive_lock(target, timeout_seconds=0.2):
-                    pass
+            with pytest.raises(TimeoutError), exclusive_lock(target, timeout_seconds=0.2):
+                pass
         finally:
             released.set()
             t.join()

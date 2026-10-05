@@ -67,7 +67,33 @@ class AudioQuality(StrEnum):
         return int(self.value.removesuffix("k"))
 
 
+class MediaType(StrEnum):
+    """Qué se descarga: video completo o solo la pista de audio."""
+
+    VIDEO = "video"
+    AUDIO = "audio"
+
+
+class Scope(StrEnum):
+    """Cuántos elementos abarca la URL: un único video o una colección."""
+
+    SINGLE = "single"
+    PLAYLIST = "playlist"
+    CHANNEL = "channel"
+
+    @property
+    def is_collection(self) -> bool:
+        return self is not Scope.SINGLE
+
+
 class DownloadKind(StrEnum):
+    """Etiqueta resumida (media + alcance) que se guarda en el historial.
+
+    Se conserva por compatibilidad con `history.json` de versiones < 0.4.0;
+    el dominio usa `MediaType` y `Scope`, que son ejes independientes (una
+    playlist puede descargarse como video o como audio).
+    """
+
     VIDEO = "video"
     AUDIO = "audio"
     PLAYLIST = "playlist"
@@ -75,9 +101,9 @@ class DownloadKind(StrEnum):
 
 
 class OverwritePolicy(StrEnum):
-    SKIP = "skip"          # No descargar si el archivo destino ya existe
+    SKIP = "skip"  # No descargar si el archivo destino ya existe
     OVERWRITE = "overwrite"  # Sobrescribir siempre
-    RENAME = "rename"       # Añadir sufijo numérico si existe
+    RENAME = "rename"  # Añadir sufijo numérico si existe
 
 
 class DownloadStatus(StrEnum):

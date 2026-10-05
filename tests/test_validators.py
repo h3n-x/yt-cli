@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from yt_cli.core.validators import (
+from yt_cli.utils.validators import (
     InvalidURLError,
     UnsafePathError,
     resolve_safe_path,

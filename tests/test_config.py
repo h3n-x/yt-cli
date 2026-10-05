@@ -110,7 +110,7 @@ class TestConfigPersistence:
         """
         config_path = tmp_path / "config.toml"
         original = AppConfig()
-        hostile_template = 'raro"con\'comillas\\y\nsalto_de_linea/{title}.{ext}'
+        hostile_template = "raro\"con'comillas\\y\nsalto_de_linea/{title}.{ext}"
         original.downloads.filename_template = hostile_template
 
         save_config(original, path=config_path)

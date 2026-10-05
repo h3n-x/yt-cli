@@ -16,9 +16,11 @@ justificación suficiente, siguiendo el estándar fijado en ARCHITECTURE.md.
 from __future__ import annotations
 
 import fcntl
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import IO
 
 
 @contextmanager
@@ -41,9 +43,7 @@ def exclusive_lock(target: Path, *, timeout_seconds: float = 10.0) -> Iterator[N
             fcntl.flock(lock_file, fcntl.LOCK_UN)
 
 
-def _acquire_with_timeout(lock_file, timeout_seconds: float) -> None:  # noqa: ANN001
-    import time
-
+def _acquire_with_timeout(lock_file: IO[str], timeout_seconds: float) -> None:
     deadline = time.monotonic() + timeout_seconds
     while True:
         try:
