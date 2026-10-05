@@ -17,3 +17,4 @@ src/**/*.tmp
 packaging/src/
 packaging/pkg/
 packaging/*.pkg.tar.*
+.hypothesis/
