@@ -12,3 +12,8 @@ build/
 coverage.xml
 htmlcov/
 src/**/*.tmp
+
+# makepkg
+packaging/src/
+packaging/pkg/
+packaging/*.pkg.tar.*
