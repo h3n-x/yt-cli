@@ -52,8 +52,8 @@ yt-dlp (p. ej. `geo_bypass_country`, `sleep_interval`). Las opciones que yt-cli 
 internamente (formato, rutas, postprocesadores, progreso) se ignoran con un aviso.
 
 **¿Cómo actualizo yt-cli?**
-Depende de cómo lo instalaste: paquete de Arch → `git pull` + `makepkg -si -p
-packaging/PKGBUILD`; pipx/uv → `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
+Depende de cómo lo instalaste: paquete de Arch → `git pull` y `makepkg -si` dentro de
+`packaging/`; pipx/uv → `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
 `yt-cli update` comprueba si hay una versión nueva y te dice el comando adecuado.
 
 **¿Puedo usar un proxy o limitar la velocidad?**

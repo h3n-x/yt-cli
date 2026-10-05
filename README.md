@@ -46,8 +46,8 @@ explicados y una UX al estilo `git`/`uv`/`cargo`/`gh`.
 
 ```bash
 git clone https://github.com/h3n-x/yt-cli.git
-cd yt-cli
-makepkg -si -p packaging/PKGBUILD
+cd yt-cli/packaging
+makepkg -si
 ```
 
 El paquete instala las dependencias de Arch (`yt-dlp` arrastra `deno` y `yt-dlp-ejs`,
@@ -183,7 +183,7 @@ yt-cli --profile archivo audio "https://youtu.be/XXXXXXXXXXX"
 
 ## Actualizar
 
-- Paquete de Arch: `git pull` y `makepkg -si -p packaging/PKGBUILD`.
+- Paquete de Arch: `git pull` y, dentro de `packaging/`, `makepkg -si`.
 - pipx/uv: `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
 - `yt-cli update` comprueba si hay una versión nueva publicada. `yt-cli self-update` solo
   actúa si yt-cli se instaló con pip en un entorno propio y si el paquete de PyPI declara
