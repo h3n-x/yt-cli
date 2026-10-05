@@ -578,7 +578,9 @@ def config_set(
 @config_app.command("path")
 def config_path() -> None:
     """Muestra la ruta del archivo de configuración."""
-    console.print(str(config_file_path()))
+    # soft_wrap evita que Rich parta la ruta en varias líneas en terminales
+    # estrechas (o en la salida capturada), lo que la haría inutilizable.
+    console.print(str(config_file_path()), soft_wrap=True, highlight=False)
 
 
 profile_app = typer.Typer(help="Gestiona perfiles de descarga con nombre (usados con --profile).")

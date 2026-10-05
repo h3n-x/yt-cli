@@ -30,9 +30,15 @@ def config_file_path() -> Path:
 
 
 def _to_toml_compatible(data: dict) -> dict:
-    """Convierte tipos no nativos de TOML (Path, etc.) a str recursivamente."""
+    """Convierte tipos no nativos de TOML (Path, etc.) a str recursivamente.
+
+    TOML no tiene `null`: las claves con valor `None` se omiten y, al cargar,
+    Pydantic les vuelve a asignar su valor por defecto (`None`).
+    """
     result: dict = {}
     for key, value in data.items():
+        if value is None:
+            continue
         if isinstance(value, dict):
             result[key] = _to_toml_compatible(value)
         elif isinstance(value, Path):

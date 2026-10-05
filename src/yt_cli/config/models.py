@@ -44,6 +44,10 @@ class DownloadDefaults(BaseModel):
 
 
 class NetworkConfig(BaseModel):
+    # Igual que en `DownloadDefaults`: `yt-cli config set` asigna strings y
+    # necesita que se validen/conviertan (p. ej. "999" fuera de rango -> error).
+    model_config = {"validate_assignment": True}
+
     proxy: str | None = None
     max_concurrent_downloads: int = Field(default=3, ge=1, le=16)
     max_concurrent_fragments: int = Field(default=4, ge=1, le=32)
@@ -52,6 +56,8 @@ class NetworkConfig(BaseModel):
 
 
 class GeneralConfig(BaseModel):
+    model_config = {"validate_assignment": True}
+
     download_directory: Path = Field(default_factory=lambda: Path.home() / "Downloads" / "yt-cli")
     language: str = "es"
     check_for_updates: bool = True

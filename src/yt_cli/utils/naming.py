@@ -13,7 +13,9 @@ import re
 from typing import Any
 
 # Caracteres prohibidos o problemáticos en Windows/macOS/Linux combinados.
-_INVALID_CHARS_RE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+# Una racha de caracteres inválidos consecutivos se reemplaza por un único
+# `replacement` (p. ej. '"?' -> '_', no '__').
+_INVALID_CHARS_RE = re.compile(r'[<>:"/\\|?*\x00-\x1f]+')
 _TRAILING_DOTS_SPACES_RE = re.compile(r"[. ]+$")
 _MULTIPLE_SPACES_RE = re.compile(r"\s+")
 
