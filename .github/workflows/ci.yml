@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: mypy src/
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install -e ".[dev]"
+      - run: pytest --cov=yt_cli --cov-report=xml --cov-fail-under=90
+      - uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+
+  build-arch-package:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar usuario no root (makepkg no corre como root)
+        run: |
+          useradd -m builder
+          chown -R builder:builder .
+      - name: Instalar dependencias de build
+        run: pacman -Sy --noconfirm python python-pip python-build python-installer python-hatchling ffmpeg
+      - name: Construir paquete
+        run: su builder -c "cd $(pwd) && makepkg -f -p packaging/PKGBUILD --nocheck"

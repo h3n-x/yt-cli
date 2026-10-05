@@ -1,0 +1,61 @@
+# Maintainer: YT-CLI Contributors <maintainers@yt-cli.example>
+pkgname=yt-cli
+pkgver=0.3.1
+pkgrel=1
+pkgdesc="Descargador multimedia profesional para YouTube (video, audio, playlists, canales)"
+arch=('any')
+url="https://github.com/yt-cli/yt-cli"
+license=('MIT')
+depends=(
+    'python>=3.13'
+    'ffmpeg'
+    'python-pydantic'
+    'python-rich'
+    'python-typer'
+    'python-aiofiles'
+    'python-httpx'
+    'python-orjson'
+    'python-platformdirs'
+    'python-tomli-w'
+    'python-yt-dlp'
+)
+makedepends=('python-build' 'python-installer' 'python-hatchling' 'python-wheel')
+checkdepends=('python-pytest' 'python-pytest-asyncio' 'python-pytest-cov' 'python-hypothesis')
+optdepends=(
+    'bash-completion: autocompletado en bash'
+    'zsh-completions: autocompletado en zsh'
+    'fish: autocompletado en fish'
+)
+source=("$pkgname-$pkgver.tar.gz::https://github.com/yt-cli/yt-cli/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP') # Reemplazar con el hash real al publicar un release firmado.
+
+build() {
+    cd "$pkgname-$pkgver"
+    python -m build --wheel --no-isolation
+}
+
+check() {
+    cd "$pkgname-$pkgver"
+    python -m pytest tests/ -q
+}
+
+package() {
+    cd "$pkgname-$pkgver"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+
+    # Bash/Zsh/Fish completions generadas por Typer.
+    install -Dm644 packaging/completions/yt-cli.bash \
+        "$pkgdir/usr/share/bash-completion/completions/yt-cli"
+    install -Dm644 packaging/completions/yt-cli.zsh \
+        "$pkgdir/usr/share/zsh/site-functions/_yt-cli"
+    install -Dm644 packaging/completions/yt-cli.fish \
+        "$pkgdir/usr/share/fish/vendor_completions.d/yt-cli.fish"
+
+    # Man page.
+    install -Dm644 docs/yt-cli.1 "$pkgdir/usr/share/man/man1/yt-cli.1"
+
+    # Documentación.
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

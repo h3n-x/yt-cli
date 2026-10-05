@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "yt-cli"
+version = "0.3.1"
+description = "Descargador multimedia de nivel profesional para YouTube, orientado a Linux."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "YT-CLI Contributors" }]
+keywords = ["youtube", "yt-dlp", "ffmpeg", "downloader", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+]
+
+dependencies = [
+    "yt-dlp>=2026.1.1",
+    "rich>=13.9",
+    "typer>=0.15",
+    "pydantic>=2.9",
+    "aiofiles>=24.1",
+    "httpx>=0.28",
+    "orjson>=3.10",
+    "platformdirs>=4.3",
+    "tomli-w>=1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.115",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[project.scripts]
+yt-cli = "yt_cli.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/yt_cli"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--cov=yt_cli --cov-report=term-missing"
+testpaths = ["tests"]
