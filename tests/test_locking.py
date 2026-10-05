@@ -10,7 +10,7 @@ from yt_cli.utils.locking import exclusive_lock
 class TestExclusiveLock:
     def test_serializes_concurrent_read_modify_write(self, tmp_path: Path) -> None:
         """Reproduce exactamente la race condition documentada como B7 en
-        AUDIT_REPORT.md: 20 hilos hacen leer->modificar->escribir sobre el
+        docs/history/AUDIT_REPORT.md: 20 hilos hacen leer->modificar->escribir sobre el
         mismo archivo. Sin lock, el valor final es << 20 (escrituras
         perdidas). Con el lock, debe ser exactamente 20.
         """
@@ -58,9 +58,8 @@ class TestExclusiveLock:
         time.sleep(0.05)  # asegura que 'holder' ya tomó el lock
 
         try:
-            with pytest.raises(TimeoutError):
-                with exclusive_lock(target, timeout_seconds=0.2):
-                    pass
+            with pytest.raises(TimeoutError), exclusive_lock(target, timeout_seconds=0.2):
+                pass
         finally:
             released.set()
             t.join()

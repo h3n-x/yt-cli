@@ -6,8 +6,10 @@ evitando dependencias de terceros más pesadas para algo tan simple.
 
 from __future__ import annotations
 
+import os
 import tomllib
 from pathlib import Path
+from typing import Any
 
 import tomli_w
 from platformdirs import user_config_dir
@@ -29,10 +31,16 @@ def config_file_path() -> Path:
     return config_dir() / "config.toml"
 
 
-def _to_toml_compatible(data: dict) -> dict:
-    """Convierte tipos no nativos de TOML (Path, etc.) a str recursivamente."""
-    result: dict = {}
+def _to_toml_compatible(data: dict[str, Any]) -> dict[str, Any]:
+    """Convierte tipos no nativos de TOML (Path, etc.) a str recursivamente.
+
+    TOML no tiene `null`: las claves con valor `None` se omiten y, al cargar,
+    Pydantic les vuelve a asignar su valor por defecto (`None`).
+    """
+    result: dict[str, Any] = {}
     for key, value in data.items():
+        if value is None:
+            continue
         if isinstance(value, dict):
             result[key] = _to_toml_compatible(value)
         elif isinstance(value, Path):
@@ -54,14 +62,14 @@ def load_config(path: Path | None = None) -> AppConfig:
     try:
         raw = tomllib.loads(target.read_text(encoding="utf-8"))
     except tomllib.TOMLDecodeError as exc:
-        raise ConfigError(f"El archivo de configuración '{target}' tiene TOML inválido: {exc}") from exc
+        raise ConfigError(
+            f"El archivo de configuración '{target}' tiene TOML inválido: {exc}"
+        ) from exc
 
     try:
         return AppConfig.model_validate(raw)
     except ValidationError as exc:
-        raise ConfigError(
-            f"La configuración en '{target}' no es válida:\n{exc}"
-        ) from exc
+        raise ConfigError(f"La configuración en '{target}' no es válida:\n{exc}") from exc
 
 
 def save_config(config: AppConfig, path: Path | None = None) -> Path:
@@ -77,7 +85,12 @@ def save_config(config: AppConfig, path: Path | None = None) -> Path:
 
     with exclusive_lock(target):
         tmp_path = target.with_suffix(".toml.tmp")
-        tmp_path.write_bytes(toml_bytes)
+        # 0600: la configuración puede contener credenciales (proxy con
+        # usuario:contraseña); no debe ser legible por otros usuarios locales.
+        fd = os.open(tmp_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(toml_bytes)
+        os.chmod(tmp_path, 0o600)  # por si el archivo temporal ya existía
         tmp_path.replace(target)
 
     return target

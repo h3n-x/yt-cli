@@ -1,50 +1,58 @@
-# Maintainer: YT-CLI Contributors <maintainers@yt-cli.example>
+# Maintainer: h3n-x <https://github.com/h3n-x>
 pkgname=yt-cli
-pkgver=0.3.1
+pkgver=0.4.0
 pkgrel=1
-pkgdesc="Descargador multimedia profesional para YouTube (video, audio, playlists, canales)"
+pkgdesc="Descargador multimedia para YouTube y YouTube Music (video, audio, playlists, canales)"
 arch=('any')
 url="https://github.com/h3n-x/yt-cli"
 license=('MIT')
 depends=(
     'python>=3.13'
     'ffmpeg'
+    'yt-dlp'           # en Arch arrastra deno + yt-dlp-ejs (retos JS de YouTube)
+    'python-mutagen'   # carátulas en opus/ogg/flac
     'python-pydantic'
     'python-rich'
     'python-typer'
-    'python-aiofiles'
     'python-httpx'
     'python-orjson'
     'python-platformdirs'
     'python-tomli-w'
-    'yt-dlp'
 )
-makedepends=('python-build' 'python-installer' 'python-hatchling' 'python-wheel')
+makedepends=('python-build' 'python-installer' 'python-hatchling')
 checkdepends=('python-pytest' 'python-pytest-asyncio' 'python-pytest-cov' 'python-hypothesis')
 optdepends=(
+    'deno: runtime JavaScript recomendado por yt-dlp (node, bun o quickjs también sirven)'
     'bash-completion: autocompletado en bash'
     'zsh-completions: autocompletado en zsh'
     'fish: autocompletado en fish'
 )
 # Aún no hay releases/tags publicados: se compila desde el árbol local del
-# repositorio (el directorio padre de packaging/). Ejecutar `makepkg -si`
-# desde yt-cli/packaging.
+# repositorio. Funciona tanto con `cd packaging && makepkg -si` como con
+# `makepkg -si -p packaging/PKGBUILD` desde la raíz (README y CI).
+# Cuando exista el tag v$pkgver, sustituir por:
+#   source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+#   sha256sums=('<sha256 real>')
 source=()
 sha256sums=()
 
 prepare() {
-    local _root="$startdir/.."
+    local _root="$startdir"
+    [[ -f "$_root/pyproject.toml" ]] || _root="$startdir/.."
     rm -rf "$srcdir/$pkgname-$pkgver"
     mkdir -p "$srcdir/$pkgname-$pkgver/packaging"
     cp -a "$_root"/{src,tests,docs,pyproject.toml,README.md,CHANGELOG.md,LICENSE} \
         "$srcdir/$pkgname-$pkgver/"
-    cp -a "$_root/packaging/completions" "$srcdir/$pkgname-$pkgver/packaging/"
+    cp -a "$_root/packaging/completions" "$_root/packaging/generate_completions.py" \
+        "$srcdir/$pkgname-$pkgver/packaging/"
     find "$srcdir/$pkgname-$pkgver" -name '__pycache__' -type d -prune -exec rm -rf {} +
 }
 
 build() {
     cd "$pkgname-$pkgver"
     python -m build --wheel --no-isolation
+    # Completions generadas desde Typer (el protocolo de Click no funciona).
+    python packaging/generate_completions.py build/completions
 }
 
 check() {
@@ -56,18 +64,14 @@ package() {
     cd "$pkgname-$pkgver"
     python -m installer --destdir="$pkgdir" dist/*.whl
 
-    # Bash/Zsh/Fish completions generadas por Typer.
-    install -Dm644 packaging/completions/yt-cli.bash \
+    install -Dm644 build/completions/yt-cli.bash \
         "$pkgdir/usr/share/bash-completion/completions/yt-cli"
-    install -Dm644 packaging/completions/yt-cli.zsh \
+    install -Dm644 build/completions/yt-cli.zsh \
         "$pkgdir/usr/share/zsh/site-functions/_yt-cli"
-    install -Dm644 packaging/completions/yt-cli.fish \
+    install -Dm644 build/completions/yt-cli.fish \
         "$pkgdir/usr/share/fish/vendor_completions.d/yt-cli.fish"
 
-    # Man page.
     install -Dm644 docs/yt-cli.1 "$pkgdir/usr/share/man/man1/yt-cli.1"
-
-    # Documentación.
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
     install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"

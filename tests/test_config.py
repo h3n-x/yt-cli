@@ -106,11 +106,11 @@ class TestConfigPersistence:
     def test_round_trip_with_special_toml_characters(self, tmp_path: Path) -> None:
         """Verifica que valores con comillas, backslashes y saltos de línea no
         rompen ni permiten inyectar TOML arbitrario al serializar/deserializar
-        (ver SECURITY_REPORT.md, punto 9).
+        (ver docs/history/SECURITY_REPORT.md, punto 9).
         """
         config_path = tmp_path / "config.toml"
         original = AppConfig()
-        hostile_template = 'raro"con\'comillas\\y\nsalto_de_linea/{title}.{ext}'
+        hostile_template = "raro\"con'comillas\\y\nsalto_de_linea/{title}.{ext}"
         original.downloads.filename_template = hostile_template
 
         save_config(original, path=config_path)

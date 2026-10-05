@@ -1,5 +1,6 @@
-"""Cache de metadatos de yt-dlp (evita re-extraer info de la misma URL en
-descargas repetidas dentro de la ventana TTL configurada por el usuario).
+"""Cache de resultados de yt-dlp con TTL (hoy: resultados de `yt-cli search`,
+para no repetir la misma consulta a YouTube dentro de la ventana configurada
+en `general.cache_ttl_hours`; se desactiva con `general.cache_enabled = false`).
 
 Almacenamiento: un archivo JSON por entrada bajo
 ~/.cache/yt-cli/metadata/<sha256(url)>.json, para poder invalidar entradas
@@ -12,7 +13,7 @@ import hashlib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import orjson
 from platformdirs import user_cache_dir
@@ -47,13 +48,17 @@ class MetadataCache:
         if not path.exists():
             return None
 
-        payload = orjson.loads(path.read_bytes())
-        cached_at = datetime.fromisoformat(payload["cached_at"])
+        try:
+            payload = orjson.loads(path.read_bytes())
+            cached_at = datetime.fromisoformat(payload["cached_at"])
+        except (orjson.JSONDecodeError, KeyError, TypeError, ValueError):
+            path.unlink(missing_ok=True)  # entrada corrupta: se descarta
+            return None
         if datetime.now(UTC) - cached_at > self._ttl:
             path.unlink(missing_ok=True)
             return None
 
-        return payload["data"]
+        return cast(dict[str, Any], payload["data"])
 
     def set(self, url: str, data: dict[str, Any]) -> None:
         if self._ttl.total_seconds() <= 0:
