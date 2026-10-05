@@ -1,6 +1,6 @@
-.TH YT-CLI 1 "2026-07-08" "yt-cli 0.3.0" "Manual del usuario"
+.TH YT-CLI 1 "2026-10-05" "yt-cli 0.4.0" "Manual del usuario"
 .SH NOMBRE
-yt-cli \- descargador multimedia profesional para YouTube
+yt-cli \- descargador de YouTube y YouTube Music para Linux
 .SH SINOPSIS
 .B yt-cli
 [\fB\-\-debug\fR]
@@ -8,92 +8,138 @@ yt-cli \- descargador multimedia profesional para YouTube
 \fICOMANDO\fR [\fIARGUMENTOS\fR]
 .SH DESCRIPCIÓN
 .B yt-cli
-es una herramienta de línea de comandos para descargar video, audio,
-playlists y canales de YouTube, con conversión de formatos vía ffmpeg,
-gestión de configuración persistente, historial de descargas y cache
-de metadatos. Está construida sobre la API Python de
+descarga video, audio, playlists, álbumes de YouTube Music y canales de YouTube, con
+conversión de formatos vía ffmpeg, configuración persistente, historial de descargas y
+cache de búsquedas. Está construido sobre la API Python de
 .BR yt-dlp (1)
 y sobre
 .BR ffmpeg (1).
+YouTube exige además un runtime JavaScript (\fBdeno\fR recomendado; también node, bun o
+quickjs).
 .SH OPCIONES GLOBALES
 .TP
 .B \-\-debug
-Muestra tracebacks completos y logs de nivel DEBUG.
+Muestra tracebacks completos y el log interno de yt-dlp.
 .TP
 .B \-\-profile, \-p \fINOMBRE\fR
-Usa un perfil de descarga con nombre definido en \fI[profiles.NOMBRE]\fR dentro de
-config.toml, en vez de los valores globales de \fI[downloads]\fR.
+Usa el perfil \fI[profiles.NOMBRE]\fR de config.toml en vez de \fI[downloads]\fR.
 .TP
 .B \-\-version
-Muestra la versión de yt-cli y sale inmediatamente.
-.SH COMANDOS
+Muestra la versión de yt-cli y sale.
+.SH COMANDOS DE DESCARGA
 .TP
 .B download \fIURL\fR
-Descarga un único video. Opciones: \fB\-\-format/\-f\fR, \fB\-\-quality/\-q\fR,
-\fB\-\-output/\-o\fR, \fB\-\-template\fR.
+Descarga un video. Si la URL es una playlist o un canal, los descarga completos.
+Opciones: \fB\-f\fR \fIFORMATO\fR (mp4, mkv, webm, mov), \fB\-q\fR \fICALIDAD\fR
+(144p\(en2160p, best) y las opciones comunes.
 .TP
 .B audio \fIURL\fR
-Descarga y convierte solo el audio de un video.
+Igual que \fBdownload\fR, pero solo el audio: \fB\-f\fR mp3, opus, m4a, flac, ogg, wav
+o aac; \fB\-q\fR 64k\(en320k o best. Funciona con playlists y álbumes de YouTube Music.
 .TP
-.B playlist \fIURL\fR
-Descarga una playlist completa.
-.TP
-.B channel \fIURL\fR
-Descarga todos los videos públicos de un canal.
+.B playlist \fIURL\fR, \fBchannel\fR \fIURL\fR
+Descarga una playlist o un canal. Con \fB\-\-audio/\-a\fR descarga solo el audio; en
+ese caso \fB\-f\fR y \fB\-q\fR toman valores de audio.
 .TP
 .B batch \fIARCHIVO\fR
-Descarga en paralelo todas las URLs listadas en \fIARCHIVO\fR (una por línea).
+Descarga en paralelo las URLs de \fIARCHIVO\fR (una por línea; '#' comenta).
+Opciones: \fB\-\-audio\fR, \fB\-o\fR, \fB\-\-archive\fR.
 .TP
 .B search \fICONSULTA\fR
-Busca videos en YouTube y muestra los resultados en una tabla.
+Busca en YouTube (\fB\-n\fR resultados, \fB\-\-json\fR).
+.SS Opciones comunes de descarga
+.TP
+.B \-o, \-\-output \fIDIR\fR
+Directorio de salida.
+.TP
+.B \-\-template \fIPLANTILLA\fR
+Plantilla de nombre: {title} {uploader} {date} {id} {playlist} {resolution} {ext}.
+.TP
+.B \-I, \-\-items \fIRANGO\fR
+Solo estas entradas de una colección: \fI1:10\fR, \fI1,3,5\-7\fR, \fI\-5:\fR.
+.TP
+.B \-\-archive / \-\-no\-archive
+Registra cada video descargado y salta los ya registrados en descargas futuras
+(predeterminado: \fIdownloads.use_download_archive\fR).
+.SH OTROS COMANDOS
 .TP
 .B config show|set|path
-Muestra, modifica o localiza el archivo de configuración TOML.
+Muestra (con credenciales de proxy ocultas), modifica o localiza la configuración.
+\fBconfig set\fR \fISECCIÓN.CLAVE VALOR\fR; el valor \fInone\fR restablece el
+predeterminado; \fBconfig set ytdlp.\fR\fICLAVE VALOR\fR fija una opción de yt-dlp.
 .TP
 .B config profile list|show|set|remove
-Gestiona perfiles de descarga con nombre (usados con \fB\-\-profile\fR).
+Gestiona perfiles de descarga con nombre.
 .TP
-.B update
-Comprueba si hay una versión más nueva de yt-cli en PyPI (no instala nada).
+.B history [\-\-failed] [\-\-json] [\-n N]
+Historial de descargas recientes, una fila por video.
 .TP
-.B self-update
-Comprueba e instala la versión más nueva de yt-cli vía pip.
+.B history export \fIARCHIVO\fR [\-\-format json|csv] [\-\-force]
+Exporta el historial; no sobrescribe sin \fB\-\-force\fR.
 .TP
-.B history
-Muestra el historial de descargas recientes.
-.TP
-.B history export \fIARCHIVO\fR
-Exporta el historial completo a JSON o CSV (\fB\-\-format\fR).
-.TP
-.B history clear
-Elimina todo el historial de descargas (pide confirmación salvo \fB\-\-yes\fR).
+.B history clear [\-\-yes]
+Borra el historial.
 .TP
 .B cache stats|clear
-Gestiona la cache local de metadatos.
+Gestiona la cache de resultados de búsqueda.
 .TP
 .B doctor
-Verifica que el entorno tenga ffmpeg, ffprobe y permisos necesarios.
+Comprueba ffmpeg, ffprobe, el runtime JavaScript, yt-dlp (y su antigüedad), mutagen,
+permisos y espacio libre.
 .TP
-.B version
-Muestra la versión de yt-cli y sus dependencias clave. Acepta \fB\-\-json\fR.
+.B version [\-\-json]
+Versión de yt-cli y de sus dependencias clave.
+.TP
+.B update
+Comprueba si hay una versión nueva en PyPI (no instala nada).
+.TP
+.B self-update [\-\-yes]
+Actualiza vía pip, solo si yt-cli se instaló con pip fuera del Python del sistema y el
+paquete de PyPI pertenece a este proyecto.
+.SH CÓDIGOS DE SALIDA
+.TP
+.B 0
+Éxito.
+.TP
+.B 1
+Error de descarga, de configuración o de entorno.
+.TP
+.B 2
+Uso incorrecto (opción o valor inválido, archivo inexistente).
+.TP
+.B 3
+Colección completada parcialmente: algunas entradas fallaron (ver
+\fByt-cli history \-\-failed\fR).
+.TP
+.B 130
+Cancelado por el usuario (Ctrl+C).
 .SH NOTAS DE USO
-Las URLs de YouTube casi siempre contienen '&', '?' o '='. En zsh y bash, estos
-caracteres deben ir siempre entre comillas, o el shell los interpretará como
-operadores propios (glob, segundo plano) en vez de pasarlos al programa:
+Las URLs de YouTube contienen '&', '?' o '='; en zsh y bash deben ir entre comillas:
 .br
-.B yt-cli download "https://youtu.be/XXXXXXXXXXX?list=YYY&si=ZZZ"
+.B yt-cli audio "https://music.youtube.com/playlist?list=XXX&si=YYY"
+.SH ENTORNO
+.TP
+.B NO_COLOR
+Si está definida, la salida no usa colores.
+.TP
+.B XDG_CONFIG_HOME, XDG_DATA_HOME, XDG_CACHE_HOME
+Ubicación de configuración, datos y cache.
 .SH ARCHIVOS
 .TP
 .I ~/.config/yt-cli/config.toml
-Configuración persistente del usuario.
+Configuración del usuario (permisos 0600).
 .TP
 .I ~/.local/share/yt-cli/history.json
 Historial de descargas.
 .TP
+.I ~/.local/share/yt-cli/archive.txt
+Archivo de descargas usado por \fB\-\-archive\fR.
+.TP
 .I ~/.cache/yt-cli/metadata/
-Cache de metadatos de yt-dlp.
+Cache de resultados de búsqueda.
 .SH VÉASE TAMBIÉN
 .BR yt-dlp (1),
-.BR ffmpeg (1)
+.BR ffmpeg (1),
+.BR deno (1)
 .SH AUTORES
-YT-CLI Contributors.
+h3n-x y colaboradores: https://github.com/h3n-x/yt-cli

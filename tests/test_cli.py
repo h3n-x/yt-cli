@@ -1,8 +1,4 @@
-"""Tests de cli/main.py vía typer.testing.CliRunner.
-
-NOTA HONESTA (ver TEST_REPORT.md): requieren `typer`, `pydantic`, `rich`,
-`yt-dlp`, ninguno instalado en el sandbox de esta sesión (sin red). Escritos
-y revisados manualmente; se ejecutarán en CI.
+"""Tests de la CLI (config, perfiles, historial, update, search) vía CliRunner.
 
 Cada test aísla su propio HOME de configuración/datos/cache vía variables de
 entorno XDG_*, para no leer ni escribir en la configuración real de la
@@ -74,7 +70,7 @@ class TestConfigCommands:
         )
 
     def test_config_set_invalid_nested_path_fails_cleanly(self) -> None:
-        """Antes esto lanzaba un AttributeError crudo (ver AUDIT_REPORT.md)."""
+        """Antes esto lanzaba un AttributeError crudo (ver docs/history/AUDIT_REPORT.md)."""
         result = runner.invoke(cli_main.app, ["config", "set", "no_existe.campo", "x"])
         assert result.exit_code == 1
 

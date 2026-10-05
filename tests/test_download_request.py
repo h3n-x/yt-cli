@@ -39,7 +39,7 @@ class TestDownloadRequestValidation:
         assert request.subtitle_languages == []
 
     def test_rejects_template_with_unknown_placeholder(self, tmp_path: Path) -> None:
-        """Corrige B5 de AUDIT_REPORT.md: antes esto solo fallaba en tiempo de
+        """Corrige B5 de docs/history/AUDIT_REPORT.md: antes esto solo fallaba en tiempo de
         ejecución dentro de yt-dlp; ahora falla rápido con ValidationError.
         """
         kwargs = _base_kwargs(tmp_path)

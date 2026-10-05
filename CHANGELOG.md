@@ -3,6 +3,86 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 Este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.0] - 2026-10-05
+
+Versión de correcciones a partir de una auditoría basada en ejecución real
+([docs/AUDIT_2026-10.md](docs/AUDIT_2026-10.md)), motivada por un fallo reportado al
+descargar una playlist de YouTube Music.
+
+### Corregido
+
+- **Una playlist con un video no disponible abortaba la descarga completa**
+  (`yt-cli audio "<playlist>"`): el alcance (video/playlist/canal) ahora se deduce de la
+  URL y en toda colección se continúa con el resto de entradas.
+- **Errores repetidos hasta 4 veces y con basura ANSI** (`[1m[0;31mERROR:`): yt-dlp ya no
+  escribe en la terminal; cada error se muestra una vez, limpio, con el id del video y
+  una pista de qué hacer.
+- **El logging interpretaba markup de Rich**: se perdía `[youtube]` de los mensajes y un
+  texto con `[/algo]` lanzaba `MarkupError` y abortaba la descarga. Los títulos tampoco
+  pueden inyectar estilos en la barra de progreso.
+- **`-f opus/ogg/flac` fallaba al final sin `mutagen`, y `-f wav/aac` o video `webm`
+  fallaban siempre** al intentar incrustar la carátula: solo se incrusta donde yt-dlp
+  puede hacerlo, y `mutagen` es ahora dependencia.
+- **`self-update` instalaba cualquier paquete llamado `yt-cli` en PyPI** (el nombre no
+  estaba registrado): ahora exige que el paquete declare este repositorio, instala la
+  versión exacta comprobada y se niega si yt-cli no se instaló con pip o si el Python es
+  el del sistema (PEP 668).
+- **Autocompletado empaquetado no funcional** (usaba el protocolo de Click): ahora se
+  genera desde Typer y un test lo verifica.
+- **Ctrl+C** mostraba un traceback o dejaba `batch` bloqueado hasta 5 minutos: salida
+  limpia con código 130 y cancelación de las descargas en curso.
+- `overwrite_policy = "rename"` comprobaba un nombre distinto del que escribía yt-dlp;
+  ahora usa `prepare_filename` de yt-dlp.
+- Un `/` en un título creaba subdirectorios en las plantillas propias.
+- Validación de URLs por *hostname*: se aceptan `:443`, `usuario@` y `youtube-nocookie.com`;
+  se rechazan puertos no numéricos.
+- `batch` con URLs repetidas dejaba una barra sin terminar; con un directorio o un archivo
+  inexistente fallaba con traceback.
+- Una excepción inesperada en una descarga de `batch` perdía el resumen completo.
+- El historial de colecciones guardaba la URL de la playlist en cada fila; ahora la del
+  video. Un `history.json` dañado da un error claro.
+- `search` y RENAME ignoraban proxy y cookies.
+- Errores de disco (disco lleno, permisos) se muestran como fallo de la descarga, no como
+  traceback.
+- Las PKGBUILD/README/CI apuntaban a un repositorio inexistente y la CI no podía pasar.
+
+### Añadido
+
+- `playlist`/`channel`: `--audio`, `--format`, `--quality`.
+- `--items` (rango de entradas) y `--archive/--no-archive` (no repetir descargas) en
+  todos los comandos de descarga; `downloads.use_download_archive`.
+- `downloads.sponsorblock_remove`, `network.cookies_from_browser` y sección `[ytdlp]`
+  para opciones adicionales de yt-dlp.
+- Posición `n/N` en la barra de progreso de colecciones y resumen final con la causa de
+  cada fallo; `history --failed`.
+- `doctor`: runtime JavaScript, `mutagen` y antigüedad de yt-dlp; avisos previos a la
+  descarga si faltan.
+- `history export --force` (ya no sobrescribe sin pedirlo).
+- `config set <clave> none` restablece el valor por defecto.
+- Workflow de release con PyPI Trusted Publishing y attestations.
+
+### Cambiado
+
+- **Código de salida 3** (antes 2) para colecciones parcialmente completadas: 2 es el
+  código de error de uso de Click. Ver la tabla de códigos en README y `man yt-cli`.
+- La cache (`general.cache_enabled`, `cache_ttl_hours`) ahora guarda los resultados de
+  `search`; antes no se usaba en ningún flujo.
+- `config.toml` se escribe con permisos 0600 y `config show` oculta credenciales de proxy.
+- CLI dividida en módulos (`cli/*_cmds.py`) y capa `services/download_service.py`;
+  imports pesados diferidos: `config`/`version`/`history` arrancan en ~240 ms (antes ~380).
+- `pyproject.toml`: versión única (`src/yt_cli/__init__.py`), licencia SPDX (PEP 639),
+  `[dependency-groups]`, URLs del proyecto, Python 3.14; `yt-dlp>=2025.11.12`.
+- CI: ruff + ruff format + mypy strict, tests en 3.13 y 3.14 con cobertura ≥ 88 %, prueba
+  del wheel y `makepkg` real en un contenedor de Arch.
+- Informes antiguos no verificados movidos a `docs/history/`.
+
+### Eliminado
+
+- Opciones sin efecto: `general.language`, `general.check_for_updates` (se ignoran si
+  siguen en un `config.toml` existente).
+- `core/converter.py` (`FFmpegConverter`, nunca usado) y la dependencia `aiofiles`.
+- `HistoryStore.find_by_url` (sin usos; el archivo de descargas cubre ese caso).
+
 ## [0.3.1] - 2026-07-20
 
 Iteración puramente visual/estética, a pedido explícito: **sin cambios de

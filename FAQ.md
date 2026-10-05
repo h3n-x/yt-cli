@@ -1,89 +1,70 @@
 # Preguntas frecuentes
 
-**Me sale `zsh: no matches found: ...` y el proceso termina con `exit 1` sin que
-yt-cli imprima nada.**
-
-Esto pasa **antes** de que yt-cli se ejecute: es tu shell (zsh, y a veces bash)
-interpretando la URL en vez de pasártela al programa. Las URLs de YouTube casi siempre
-tienen `&`, `?` o `=`, y sin comillas:
-
-- `?algo` se interpreta como un patrón glob (de ahí "no matches found").
-- `&` corta el comando ahí y lo manda a segundo plano (de ahí el `[1] <pid>` antes del
-  error, y que veas el mismo comando reportado sin el resto de la URL).
-
-**Solución: pon la URL completa entre comillas dobles.**
+**Me sale `zsh: no matches found: ...` y yt-cli no imprime nada.**
+Ocurre **antes** de que yt-cli se ejecute: el shell interpreta `?` como un glob y `&` como
+"ejecutar en segundo plano". Pon la URL entre comillas dobles:
 
 ```bash
-# Falla:
-yt-cli playlist https://music.youtube.com/playlist?list=XYZ&si=abc
-
-# Funciona:
-yt-cli playlist "https://music.youtube.com/playlist?list=XYZ&si=abc"
+yt-cli audio "https://music.youtube.com/playlist?list=XYZ&si=abc"
 ```
 
-Si quieres evitar el problema de raíz en zsh, también puedes desactivar el glob de
-signos de interrogación en tu `.zshrc` con `setopt no_nomatch`, aunque seguir
-entrecomillando URLs es la práctica recomendada en cualquier shell.
+**¿Cómo descargo una playlist o un álbum de YouTube Music en audio?**
+`yt-cli audio "<URL de la playlist>"` (detecta que es una playlist), o de forma explícita
+`yt-cli playlist "<URL>" --audio -f opus`. Si un tema no está disponible, se salta, se
+sigue con el resto y al final se lista qué falló y por qué; el código de salida es 3
+(parcial). `yt-cli history --failed` muestra el detalle después.
 
-**¿yt-cli funciona en distros distintas a Arch?**
-Sí, el núcleo es Python puro + ffmpeg. El PKGBUILD es específico de Arch/AUR, pero
-`pip install -e .` funciona en cualquier distro con Python 3.13+ y ffmpeg instalados.
+**Un video da "Video unavailable". ¿Es un bug?**
+Normalmente no: el video fue eliminado, es privado o está bloqueado en tu región. Si el
+mensaje habla de verificar que no eres un bot o de restricción de edad, configura las
+cookies de un navegador con sesión iniciada en YouTube:
+`yt-cli config set network.cookies_from_browser firefox`.
 
-**¿Por qué falla `yt-cli download` con "Host no soportado"?**
-yt-cli valida las URLs contra una lista blanca (`youtube.com`, `youtu.be`,
-`music.youtube.com`) por seguridad. Otros sitios no están soportados en esta versión
-(ver ROADMAP.md).
+**¿Cómo sincronizo una playlist sin volver a descargar lo que ya tengo?**
+Usa `--archive` (o `yt-cli config set downloads.use_download_archive true`). yt-cli
+registra cada video descargado en `~/.local/share/yt-cli/archive.txt` y lo salta la
+próxima vez; en el resumen aparece como "ya descargadas antes".
 
-**¿Puedo usar un proxy?**
-Sí: `yt-cli config set network.proxy "http://usuario:pass@host:puerto"`.
+**`doctor` dice que falta un runtime JavaScript.**
+Desde finales de 2025, YouTube exige resolver retos JavaScript y yt-dlp necesita un
+runtime externo. En Arch, el paquete `yt-dlp` ya instala `deno`; en otras distros instala
+`deno` (recomendado), `node`, `bun` o `quickjs`.
 
-**¿Puedo limitar la velocidad de descarga?**
-Sí: `yt-cli config set network.rate_limit_kbps 500` (límite en KB/s).
+**No se incrusta la carátula en opus/flac/ogg.**
+yt-dlp necesita el módulo `mutagen` para esos formatos (`sudo pacman -S python-mutagen`;
+el paquete de yt-cli ya lo declara). En `wav`, `aac` y video `webm` no es posible incrustar
+carátulas, así que yt-cli no lo intenta.
 
-**¿Cómo actualizo yt-cli a la última versión?**
-`yt-cli update` solo comprueba si hay una versión nueva; `yt-cli self-update` la instala
-vía `pip install --upgrade yt-cli`. Ambos consultan la API pública de PyPI.
-
-**¿Puedo desactivar los colores?**
-Sí, yt-cli respeta el estándar [`NO_COLOR`](https://no-color.org/): ejecuta con
-`NO_COLOR=1 yt-cli ...` y toda la salida (incluidos los errores) se imprime sin códigos
-ANSI de color.
-
-**¿Puedo usar la salida de yt-cli en un script?**
-`search`, `history` y `version` aceptan `--json` para salida machine-readable, pensada
-para pipear a `jq` u otras herramientas.
+**¿Dónde se guardan las descargas?**
+En `~/Downloads/yt-cli/` por defecto: `yt-cli config set general.download_directory ~/Music`,
+o `-o <dir>` en cada comando. La plantilla por defecto crea una carpeta por canal; para
+archivos sueltos usa `yt-cli config set downloads.filename_template '{title}.{ext}'`.
 
 **¿Qué hace `overwrite_policy = "rename"`?**
-Si el archivo destino ya existe, en vez de omitir la descarga (`skip`) o sobrescribir
-(`overwrite`), yt-cli agrega un sufijo numérico: `Video.mp4`, `Video (1).mp4`,
-`Video (2).mp4`, etc. Nota: esto solo aplica a descargas individuales (`download`/`audio`),
-no a playlists/canales completos (ver ROADMAP.md).
+Si el archivo destino ya existe, añade un sufijo: `Video.mp4`, `Video (1).mp4`, … Se
+calcula con la misma lógica de nombres que usa yt-dlp. Solo aplica a descargas
+individuales, no a playlists/canales.
 
-**¿Cómo uso distintos ajustes según el tipo de descarga (p. ej. FLAC para archivar,
-480p para ver rápido en el celular)?**
-Define perfiles con nombre en `config.toml`:
+**¿Puedo pasarle a yt-dlp una opción que yt-cli no expone?**
+Sí, en la sección `[ytdlp]` de `config.toml` o con
+`yt-cli config set ytdlp.<opción> <valor>`, usando los nombres de la API de Python de
+yt-dlp (p. ej. `geo_bypass_country`, `sleep_interval`). Las opciones que yt-cli gestiona
+internamente (formato, rutas, postprocesadores, progreso) se ignoran con un aviso.
 
-```toml
-[profiles.archivo]
-audio_format = "flac"
-audio_quality = "best"
-```
+**¿Cómo actualizo yt-cli?**
+Depende de cómo lo instalaste: paquete de Arch → `git pull` + `makepkg -si -p
+packaging/PKGBUILD`; pipx/uv → `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
+`yt-cli update` comprueba si hay una versión nueva y te dice el comando adecuado.
 
-Y actívalos con `yt-cli --profile archivo audio URL`.
+**¿Puedo usar un proxy o limitar la velocidad?**
+`yt-cli config set network.proxy "http://usuario:pass@host:puerto"` (se guarda con
+permisos 0600 y se oculta en `config show`) y
+`yt-cli config set network.rate_limit_kbps 500`.
 
-**¿Dónde se guardan mis descargas por defecto?**
-En `~/Downloads/yt-cli/`, configurable con
-`yt-cli config set general.download_directory "/ruta/que/quieras"`.
+**¿Puedo desactivar los colores o usar la salida en scripts?**
+`NO_COLOR=1 yt-cli ...` desactiva los colores. `search`, `history` y `version` aceptan
+`--json`. Los códigos de salida están documentados en el README y en `man yt-cli`.
 
-**¿Cómo borro el historial?**
-`yt-cli history clear` (pide confirmación; usa `--yes` para omitirla). También puedes
-exportarlo antes de borrarlo: `yt-cli history export backup.json`.
-
-**`yt-cli doctor` dice que ffmpeg no está instalado, pero sí lo tengo.**
-Verifica que esté en tu `PATH`: `which ffmpeg`. Si usas un entorno virtual o un gestor de
-versiones, asegúrate de que el shell donde ejecutas `yt-cli` tenga el mismo `PATH` que
-usaste para instalar ffmpeg.
-
-**¿Esto elude las protecciones de YouTube (DRM, geobloqueo, etc.)?**
-No. yt-cli usa yt-dlp para descargar contenido públicamente accesible, sujeto a los
-Términos de Servicio de YouTube. El usuario es responsable de su uso.
+**¿Esto elude protecciones de YouTube (DRM)?**
+No. yt-cli usa yt-dlp para contenido accesible públicamente; el usuario es responsable
+de cumplir los Términos de Servicio de YouTube.

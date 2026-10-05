@@ -1,70 +1,46 @@
 # Roadmap
 
-Este documento distingue explícitamente lo que **ya funciona** de lo que **falta**, para no
-generar expectativas falsas sobre el estado del proyecto.
+Distingue lo que **funciona y está probado** de lo que **falta**. La auditoría que
+originó la versión 0.4.0 está en [docs/AUDIT_2026-10.md](docs/AUDIT_2026-10.md).
 
-## Implementado y probado (v0.1.0 → v0.3.0)
+## Implementado (≤ 0.4.0)
 
-- [x] Descarga de video/audio individual, con calidad y formato configurables
-- [x] Playlists y canales, **con reporte preciso de éxito parcial** (v0.2.0: antes
-      siempre reportaban COMPLETED aunque fallaran entradas — ver AUDIT_REPORT.md B4)
-- [x] Descarga por lotes (`batch`) con concurrencia real vía cola asíncrona
-- [x] Reanudación automática (`continuedl`) y políticas de sobrescritura
-      (`skip`/`overwrite`/**`rename` — implementado en v0.2.0, antes definido pero
-      no funcional, ver B2**)
-- [x] Embebido de miniatura, metadata y capítulos
-- [x] Conversión de formatos vía postprocesadores de ffmpeg
-- [x] Configuración persistente en TOML, validada con Pydantic
-- [x] Perfiles de configuración con nombre (`--profile`, v0.2.0), **gestionables por
-      comando desde v0.3.0** (`config profile list/show/set/remove`)
-- [x] Historial de descargas y cache de metadatos con TTL
-- [x] Exportación de historial a JSON/CSV (v0.2.0), **y salida `--json` también en
-      `search`/`history`/`version`** (v0.3.0, para scripting)
-- [x] Validación estricta de URLs y rutas (prevención de path traversal / command injection)
-- [x] Locking entre procesos para config/historial/cache (v0.2.0, ver B7)
-- [x] Rate limiting funcional y reintentos con backoff exponencial (v0.2.0, ver B3)
-- [x] Barra de progreso enriquecida (Rich): velocidad, ETA, tamaño
-- [x] `doctor` para diagnóstico del entorno (v0.3.0: chequeos reales de escritura,
-      versión de Python y espacio en disco; antes tenía una comprobación que siempre
-      pasaba sin verificar nada — ver AUDIT_REPORT.md)
-- [x] **`update`/`self-update`** reales, vía API de PyPI + `pip install --upgrade` (v0.3.0)
-- [x] **`--version` como flag global** además del subcomando `version` (v0.3.0)
-- [x] **Soporte de `NO_COLOR`** para accesibilidad (v0.3.0)
-- [x] **Tests de `cli/main.py` vía `typer.testing.CliRunner`** (v0.3.0, 34 tests nuevos en
-      `tests/test_cli.py` — cierra la brecha que TEST_REPORT.md dejaba pendiente en v0.2.0)
-- [x] PKGBUILD, man page y completado bash/zsh/fish
+- [x] Video y audio individuales con formato y calidad configurables
+- [x] Playlists, álbumes de YouTube Music y canales **en video o en audio**; las entradas
+      no disponibles no detienen el resto y se informan con su causa (0.4.0)
+- [x] Detección automática de playlist/canal a partir de la URL (0.4.0)
+- [x] Rango de entradas (`--items`) y archivo de descargas (`--archive`) (0.4.0)
+- [x] Descarga por lotes concurrente, con cancelación limpia (Ctrl+C) (0.4.0)
+- [x] Errores de yt-dlp limpios, traducidos y mostrados una sola vez (0.4.0)
+- [x] Carátula/metadatos/capítulos; carátula solo donde el formato la admite (0.4.0)
+- [x] SponsorBlock, cookies del navegador y opciones `[ytdlp]` (0.4.0)
+- [x] Políticas `skip`/`overwrite`/`rename` (rename con la misma lógica de nombres que yt-dlp, 0.4.0)
+- [x] Configuración TOML validada (permisos 0600), perfiles gestionables por comando
+- [x] Historial por video, `history --failed`, exportación JSON/CSV
+- [x] Cache con TTL para `search` (0.4.0)
+- [x] `doctor` con runtime JS, mutagen y antigüedad de yt-dlp (0.4.0)
+- [x] `update`/`self-update` seguros frente a suplantación del nombre en PyPI (0.4.0)
+- [x] Autocompletado bash/zsh/fish generado desde Typer (0.4.0) y página de manual
+- [x] CI: ruff, ruff format, mypy strict, tests en 3.13 y 3.14, wheel, `makepkg` real (0.4.0)
+- [x] Workflow de release con PyPI Trusted Publishing y attestations (0.4.0)
 
 ## Pendiente para 1.0
 
-- [ ] **`config init` interactivo** (asistente de primer uso).
-- [ ] **Verificación de firma/checksum en `self-update`.** La v0.3.0 delega la integridad
-      del paquete completamente en pip + el índice de confianza de PyPI (HTTPS, hashes de
-      pip), pero no hace una verificación de firma adicional propia (p. ej. Sigstore).
-      Documentado explícitamente en SECURITY.md como limitación conocida, no como algo
-      resuelto.
-- [ ] **Resolución de conflictos de `RENAME` para playlists/canales.** v0.2.0 implementa
-      `RENAME` solo para descargas individuales (video/audio); en colecciones requeriría
-      una extracción de metadatos por cada entrada antes de descargar, lo cual es costoso
-      en latencia (ver `_resolve_rename_target` en `core/downloader.py`).
-- [ ] **Suite de integración contra la red real de YouTube**, gateada detrás de un marcador
-      `@pytest.mark.integration` y deshabilitada por defecto en CI (para no depender de
-      disponibilidad externa ni violar límites de tasa).
-- [ ] **Migración de historial a SQLite** si el volumen de entradas crece lo suficiente
-      como para que las consultas sobre JSON dejen de ser eficientes (ver ARCHITECTURE.md).
-- [ ] **Uso efectivo de `aiofiles`** para operaciones de archivo propias del proyecto
-      (hoy la escritura de archivos multimedia la gestiona yt-dlp/ffmpeg internamente,
-      no el código de yt-cli).
-- [ ] **CI/CD en GitHub Actions**: el workflow (`ci.yml`) está escrito y es correcto por
-      revisión, pero no se ejecutó en esta sesión (sandbox sin acceso al runner de GitHub).
-- [ ] **Descarga de livestreams en curso** (yt-dlp lo soporta parcialmente; falta manejo
-      explícito de reintentos por segmentos aún no publicados).
-- [ ] **Empaquetado AUR real** (publicación en `aur.archlinux.org`, hoy el PKGBUILD es
-      funcional pero no está publicado).
-- [ ] **Internacionalización** más allá de mensajes en español (el campo `general.language`
-      existe en configuración pero aún no se usa para cambiar los strings de la CLI).
-- [ ] **Sistema de plugins.** Deliberadamente no implementado en v0.2.0: definir una API
-      pública de plugins es una decisión de diseño de alto costo de mantenimiento a largo
-      plazo (compatibilidad hacia atrás) que no debe tomarse sin telemetría de uso real.
-- [ ] **TUI (Textual), scheduler, watch mode, hooks pre/post descarga.** Ídem: se
-      deprioriza deliberadamente hasta tener señal de qué funcionalidades de "prioridad
-      media" del roadmap generan demanda real.
+- [ ] **Publicar**: registrar `yt-cli` en PyPI (Trusted Publisher) y el paquete en AUR.
+      Requiere las cuentas del mantenedor; los workflows ya están listos.
+- [ ] **Verificar attestations (PEP 740) en `self-update`** antes de instalar.
+- [ ] **Suite de integración real** (`@pytest.mark.integration`, ejecución semanal) con un
+      video CC corto y una playlist de dos elementos con uno privado.
+- [ ] **Historial en SQLite** cuando el volumen lo justifique (hoy `add_many` escribe una
+      vez por ejecución; con decenas de miles de filas convendría migrar).
+- [ ] **Metadatos de YouTube Music más ricos** (álbum, número de pista, carátula cuadrada).
+- [ ] **Internacionalización** (gettext es/en). Los textos de ayuda propios de Typer/Click
+      (`--help`, `--install-completion`) siguen en inglés.
+- [ ] **`RENAME` para playlists/canales.**
+- [ ] **Barra de progreso global** en colecciones (hoy se muestra la posición `n/N` en la
+      barra del archivo actual).
+
+## Fuera de alcance por ahora
+
+TUI (Textual), scheduler, watch mode, sistema de plugins y soporte de otros sitios: son
+decisiones de alto coste de mantenimiento que se aplazan hasta tener señales de uso real.

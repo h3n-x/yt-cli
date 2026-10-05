@@ -1,6 +1,6 @@
 """Bloqueo de archivos entre procesos, vía `fcntl.flock` (POSIX/Linux).
 
-Corrige B7 de AUDIT_REPORT.md: el patrón "leer todo → modificar → escribir todo"
+Corrige B7 de docs/history/AUDIT_REPORT.md: el patrón "leer todo → modificar → escribir todo"
 usado por config/historial/cache es atómico dentro de un proceso, pero sin
 coordinación entre procesos dos invocaciones concurrentes de `yt-cli` pueden
 perder escrituras (TOCTOU). Este módulo serializa el ciclo completo

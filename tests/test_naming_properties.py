@@ -1,12 +1,4 @@
-"""Property-based tests para utils/naming.py, usando Hypothesis.
-
-NOTA HONESTA (ver TEST_REPORT.md): estos tests están escritos y son
-correctos según revisión manual de la lógica de `sanitize_filename`, pero
-`hypothesis` no está instalado en el entorno de este sandbox (sin acceso de
-red para `pip install`), así que no se ejecutaron aquí. Las propiedades
-enunciadas se verificaron por separado con una batería manual de casos borde
-representativos (ver `test_naming.py` y la sesión de auditoría).
-"""
+"""Property-based tests para utils/naming.py, usando Hypothesis."""
 
 from __future__ import annotations
 

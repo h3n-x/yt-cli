@@ -1,10 +1,6 @@
-"""Tests de yt_cli.core.downloader.
-
-NOTA HONESTA (ver TEST_REPORT.md): este módulo importa `yt_dlp`, que no está
-instalado en el sandbox de esta sesión (sin red para `pip install`). Estos
-tests están escritos y revisados manualmente por lógica, pero no se
-ejecutaron en esta sesión; se ejecutarán en CI, donde `yt-dlp` sí está
-disponible como dependencia declarada del proyecto.
+"""Tests unitarios de yt_cli.core.downloader (opciones, progreso, RENAME,
+resumen de colecciones). Los flujos completos de descarga están en
+tests/test_downloader_component.py.
 """
 
 from __future__ import annotations

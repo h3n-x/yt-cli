@@ -1,50 +1,46 @@
 # Política de seguridad
 
-## Reporte de vulnerabilidades
+## Reportar una vulnerabilidad
 
-Si encuentras una vulnerabilidad de seguridad en yt-cli, repórtala de forma privada a
-`security@yt-cli.example` (no abras un issue público). Incluye:
-
-- Versión de yt-cli afectada
-- Pasos para reproducir
-- Impacto estimado
-
-Se confirma la recepción en un plazo de 72 horas y se coordina la divulgación responsable
-tras publicar un parche.
+Repórtala de forma privada mediante **GitHub → pestaña Security → "Report a
+vulnerability"** en https://github.com/h3n-x/yt-cli (no abras un issue público).
+Incluye la versión (`yt-cli version`), los pasos para reproducir y el impacto estimado.
 
 ## Garantías de diseño
 
-yt-cli sigue estas reglas de forma no negociable:
+1. **Sin comandos de shell construidos por concatenación.** yt-dlp se usa como librería;
+   el único subproceso propio (`pip` en `self-update`) usa una lista de argumentos fija y
+   `shell=False`.
+2. **URLs en lista blanca** (`http`/`https`; `youtube.com`, `youtu.be`,
+   `youtube-nocookie.com` y sus subdominios, comparando el *hostname* real, no el texto
+   antes de `@` ni el puerto).
+3. **Texto remoto nunca interpretado como markup.** Títulos, nombres de canal y mensajes
+   de error se escapan antes de pasar por Rich, y el logging no interpreta markup: un
+   título no puede cambiar estilos ni provocar errores de render.
+4. **Nombres de archivo:** yt-dlp sanea cada campo de metadatos (un `/` en un título se
+   convierte en `⧸`), por lo que los metadatos no pueden escapar del directorio de
+   descarga. Las plantillas solo admiten placeholders simples.
+5. **Configuración privada:** `config.toml` se escribe con permisos `0600` (puede contener
+   credenciales de proxy) y `config show` oculta `usuario:contraseña`.
+6. **Escrituras atómicas y con lock entre procesos** para configuración, historial y cache.
+7. **Opciones de yt-dlp vía `[ytdlp]`:** las claves de las que depende yt-cli (rutas,
+   formato, postprocesadores, hooks, logger) no se pueden sobrescribir.
 
-1. **Nunca se ejecutan comandos de shell construidos por concatenación de strings.**
-   Toda invocación a `ffmpeg`/`ffprobe` usa `subprocess.run` con una lista explícita de
-   argumentos y `shell=False`.
-2. **yt-dlp se usa como librería Python**, no como subproceso con argumentos armados a
-   partir de entrada del usuario.
-3. **Toda URL se valida contra una lista blanca de esquemas (`http`/`https`) y hosts**
-   (`youtube.com`, `youtu.be`, `music.youtube.com`) antes de pasarla a yt-dlp.
-4. **Toda ruta derivada de metadatos remotos** (títulos de video, nombres de canal, etc.)
-   se resuelve y se confina al directorio de descarga configurado, rechazando cualquier
-   intento de `../` (path traversal).
-5. **La configuración y el historial se escriben de forma atómica** (archivo temporal +
-   `rename()`), para que una interrupción a mitad de escritura no corrompa el estado.
-6. **Desde v0.2.0, la configuración, el historial y la cache usan un lock exclusivo
-   entre procesos** (`utils/locking.py`, vía `fcntl.flock`) alrededor de todo el ciclo
-   lectura-modificación-escritura, para que dos invocaciones concurrentes de `yt-cli` no
-   se pisen los cambios mutuamente (ver `AUDIT_REPORT.md`, hallazgo B7, y
-   `SECURITY_REPORT.md` para la prueba de concurrencia real que demuestra la corrección).
+## `update` / `self-update`
 
-## Limitación conocida: `self-update`
-
-`yt-cli self-update` (v0.3.0) consulta la API pública de PyPI y ejecuta
-`pip install --upgrade yt-cli` mediante una lista de argumentos fija (nunca un comando de
-shell construido por concatenación). La integridad del paquete depende enteramente de la
-cadena de confianza de pip/PyPI (HTTPS + hashes) — **no hay una verificación de firma
-adicional propia** (p. ej. Sigstore/cosign) antes de instalar. Esto se documenta aquí
-explícitamente como limitación conocida, no como un problema resuelto; ver ROADMAP.md.
+- Solo se considera legítimo un paquete `yt-cli` de PyPI que declare
+  `https://github.com/h3n-x/yt-cli` en sus URLs de proyecto; si el nombre lo registrara
+  otra persona, yt-cli se niega a recomendarlo o instalarlo.
+- `self-update` solo actúa si yt-cli se instaló con pip y **fuera** de un Python gestionado
+  por la distribución (PEP 668); en otro caso indica cómo actualizar con el gestor
+  correspondiente (pacman/AUR, pipx, uv).
+- Instala exactamente la versión comprobada (`yt-cli==X.Y.Z`).
+- La publicación en PyPI está preparada con Trusted Publishing y attestations (PEP 740)
+  en `.github/workflows/release.yml`. **Limitación conocida:** `self-update` aún no
+  verifica esas attestations antes de instalar; confía en la cadena HTTPS + hashes de pip.
 
 ## Alcance
 
-Este proyecto descarga contenido de YouTube para uso personal. El usuario es responsable
-de cumplir los Términos de Servicio de YouTube y las leyes de derechos de autor aplicables
-en su jurisdicción. yt-cli no provee ni facilita la elusión de DRM.
+yt-cli descarga contenido accesible públicamente para uso personal y no elude DRM. El
+usuario es responsable de cumplir los Términos de Servicio de YouTube y las leyes de
+derechos de autor aplicables.
