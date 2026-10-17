@@ -1,48 +1,84 @@
-# yt-cli
+<h3 align="center">
+  <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/misc/transparent.png" height="30" width="0"/>
+  yt-cli
+  <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/misc/transparent.png" height="30" width="0"/>
+  <br/>
+  <a href="https://github.com/h3n-x/yt-cli">YouTube and YouTube Music downloader for Linux, built on yt-dlp's Python API, with a git/uv/cargo/gh-style UX</a>
+  <br/><br/>
+  <p>
+    🌐 <strong>English</strong> · <a href="README.es.md">Español</a>
+  </p>
+</h3>
 
-Descargador de YouTube y YouTube Music para Linux (probado en Arch Linux), construido
-sobre la API Python de [yt-dlp](https://github.com/yt-dlp/yt-dlp): video, audio,
-playlists, canales y descargas por lotes, con buenos valores por defecto, errores
-explicados y una UX al estilo `git`/`uv`/`cargo`/`gh`.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.13_%7C_3.14-74c7ec?style=for-the-badge&logo=python&logoColor=d9e0ee&labelColor=363a4f" alt="Python"/>
+  <img src="https://img.shields.io/badge/yt--dlp-Python_API-f38ba8?style=for-the-badge&logo=youtube&logoColor=d9e0ee&labelColor=363a4f" alt="yt-dlp"/>
+  <img src="https://img.shields.io/badge/CLI-Typer_%2B_Rich-cba6f7?style=for-the-badge&labelColor=363a4f" alt="CLI"/>
+  <img src="https://img.shields.io/badge/Arch_Linux-PKGBUILD-89dceb?style=for-the-badge&logo=archlinux&logoColor=d9e0ee&labelColor=363a4f" alt="Arch Linux"/>
+</p>
 
-> **Estado:** beta (v0.4.0). Ver [CHANGELOG.md](CHANGELOG.md) y [ROADMAP.md](ROADMAP.md).
-> La auditoría técnica que motivó esta versión está en
-> [docs/AUDIT_2026-10.md](docs/AUDIT_2026-10.md).
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.4.0_beta-fab387?style=for-the-badge&labelColor=363a4f" alt="version"/>
+  <img src="https://img.shields.io/badge/tests-pytest_%C2%B7_hypothesis-a6e3a1?style=for-the-badge&logo=pytest&logoColor=d9e0ee&labelColor=363a4f" alt="tests"/>
+  <img src="https://img.shields.io/badge/typing-mypy-74c7ec?style=for-the-badge&labelColor=363a4f" alt="typing"/>
+  <img src="https://img.shields.io/badge/license-MIT-a6e3a1?style=for-the-badge&labelColor=363a4f" alt="license"/>
+</p>
 
-> ## ⚠️ Siempre entre comillas las URLs
->
-> Las URLs de YouTube contienen `&`, `?` o `=`. Sin comillas, **tu shell** (zsh, bash)
-> las interpreta antes de que yt-cli llegue a ejecutarse:
+<p align="center">
+  <a href="#-install">Install</a>
+  ·
+  <a href="#%EF%B8%8F-usage">Usage</a>
+  ·
+  <a href="#%EF%B8%8F-configuration">Configuration</a>
+  ·
+  <a href="CHANGELOG.md">Changelog</a>
+  ·
+  <a href="LICENSE">License</a>
+</p>
+
+&nbsp;
+
+## 🪄 About
+
+A YouTube and YouTube Music downloader for Linux (tested on Arch Linux), built on the Python API of
+[yt-dlp](https://github.com/yt-dlp/yt-dlp): video, audio, playlists, channels and batch downloads, with good defaults,
+explained errors and a UX in the style of `git`, `uv`, `cargo` and `gh`.
+
+> [!NOTE]
+> **Status:** beta (v0.4.0). See [CHANGELOG.md](CHANGELOG.md) and [ROADMAP.md](ROADMAP.md); the technical audit behind this
+> release is in [docs/AUDIT_2026-10.md](docs/AUDIT_2026-10.md).
+
+> [!WARNING]
+> **Always quote URLs.** YouTube URLs contain `&`, `?` or `=`, and without quotes **your shell** (zsh, bash) interprets them
+> before yt-cli even runs:
 >
 > ```bash
 > yt-cli audio https://music.youtube.com/playlist?list=XYZ&si=abc    # ❌ zsh: no matches found
 > yt-cli audio "https://music.youtube.com/playlist?list=XYZ&si=abc"  # ✅
 > ```
 
-## Características
+&nbsp;
 
-- Video (`mp4`, `mkv`, `webm`, `mov`) y audio (`mp3`, `opus`, `m4a`, `flac`, `ogg`, `wav`, `aac`)
-- Calidad `144p`–`2160p` para video, `64k`–`320k` para audio, o `best`
-- **Playlists, álbumes de YouTube Music y canales en video o en audio**; un video no
-  disponible no detiene el resto, y al final se lista qué falló y por qué
-- Rango de entradas (`--items 1:10`) y **archivo de descargas** (`--archive`) para
-  sincronizar una playlist sin volver a bajar lo que ya tienes
-- Descarga por lotes concurrente desde un archivo de URLs
-- Carátula, metadatos y capítulos incrustados; subtítulos opcionales; recorte de
-  segmentos con SponsorBlock
-- Cookies del navegador para videos con restricción de edad o verificación anti-bot
-- Errores de yt-dlp traducidos a una causa y una acción concreta
-- Perfiles de configuración con nombre (`--profile`)
-- Historial por video (exportable a JSON/CSV) y cache de búsquedas con TTL
-- Configuración TOML validada; opciones avanzadas de yt-dlp vía `[ytdlp]`
-- `doctor` comprueba ffmpeg, el runtime JavaScript que YouTube exige, mutagen y la
-  antigüedad de yt-dlp
-- Salida `--json` en `search`, `history` y `version`; respeta [`NO_COLOR`](https://no-color.org/)
-- Autocompletado para bash, zsh y fish; página de manual
+## ✨ Features
 
-## Instalación
+| | |
+|---|---|
+| 🎬 **Video and audio** | Video in `mp4`, `mkv`, `webm`, `mov`; audio in `mp3`, `opus`, `m4a`, `flac`, `ogg`, `wav`, `aac`. Quality `144p`–`2160p` for video, `64k`–`320k` for audio, or `best`. |
+| 📚 **Playlists, albums and channels** | YouTube Music albums and whole channels, as video or audio. An unavailable video doesn't stop the rest, and at the end you get what failed and why. |
+| 🔄 **Sync** | Entry ranges (`--items 1:10`) and a download archive (`--archive`) to sync a playlist without fetching what you already have. |
+| ⚡ **Batch** | Concurrent downloads from a file of URLs. |
+| 🏷️ **Metadata** | Cover art, metadata and chapters embedded; optional subtitles; SponsorBlock segment removal. |
+| 🍪 **Browser cookies** | For age-restricted videos or anti-bot checks. |
+| 🩺 **Explained errors** | yt-dlp errors translated into a cause and a concrete action; `doctor` checks ffmpeg, the JavaScript runtime YouTube requires, mutagen and how old yt-dlp is. |
+| ⚙️ **Configuration** | Validated TOML, named profiles (`--profile`), advanced yt-dlp options through `[ytdlp]`. |
+| 🗂️ **History and cache** | Per-video history (exportable to JSON or CSV) and a search cache with a TTL. |
+| 🧰 **Shell-friendly** | `--json` output in `search`, `history` and `version`; respects [`NO_COLOR`](https://no-color.org/); completion for bash, zsh and fish; a man page. |
 
-### Arch Linux
+&nbsp;
+
+## 📦 Install
+
+**Arch Linux:**
 
 ```bash
 git clone https://github.com/h3n-x/yt-cli.git
@@ -50,95 +86,105 @@ cd yt-cli/packaging
 makepkg -si
 ```
 
-El paquete instala las dependencias de Arch (`yt-dlp` arrastra `deno` y `yt-dlp-ejs`,
-necesarios para YouTube), el autocompletado y la página de manual (`man yt-cli`).
+The package installs the Arch dependencies (`yt-dlp` pulls in `deno` and `yt-dlp-ejs`, which YouTube needs), the completions
+and the man page (`man yt-cli`).
 
-### Otras distribuciones (Python 3.13+)
+**Other distributions (Python 3.13+):**
 
 ```bash
 pipx install git+https://github.com/h3n-x/yt-cli.git
-# o
+# or
 uv tool install git+https://github.com/h3n-x/yt-cli.git
 ```
 
-Además necesitas `ffmpeg` y un runtime JavaScript para yt-dlp (se recomienda
-[`deno`](https://deno.com/)). Comprueba el entorno con `yt-cli doctor`.
+You also need `ffmpeg` and a JavaScript runtime for yt-dlp ([`deno`](https://deno.com/) is recommended). Check the
+environment with `yt-cli doctor`.
 
-## Uso
+&nbsp;
+
+## ⌨️ Usage
 
 ```bash
-# Una playlist o un álbum de YouTube Music, en audio (opus, mejor calidad)
+# A playlist or a YouTube Music album, as audio (opus, best quality)
 yt-cli audio "https://music.youtube.com/playlist?list=XXXXXXXX" -f opus -q best
 
-# Lo mismo, de forma explícita y solo las 10 primeras pistas
+# The same, explicitly, and only the first 10 tracks
 yt-cli playlist "https://www.youtube.com/playlist?list=XXXXXXXX" --audio -f m4a --items 1:10
 
-# Sincronizar: la segunda vez solo baja las pistas nuevas
+# Sync: the second time only the new tracks are downloaded
 yt-cli audio "https://music.youtube.com/playlist?list=XXXXXXXX" --archive
 
-# Un video en 1080p (mp4 por defecto) o en otra calidad
+# A video in 1080p (mp4 by default), or another quality
 yt-cli download "https://www.youtube.com/watch?v=XXXXXXXXXXX"
 yt-cli download "https://youtu.be/XXXXXXXXXXX" -q 720p -f mkv
 
-# Un canal completo, en video o solo audio
-yt-cli channel "https://www.youtube.com/@algun_canal" --audio
+# A whole channel, as video or audio only
+yt-cli channel "https://www.youtube.com/@some_channel" --audio
 
-# Por lotes (concurrencia en network.max_concurrent_downloads)
+# Batch (concurrency in network.max_concurrent_downloads)
 yt-cli batch urls.txt --audio
 
-# Buscar
+# Search, diagnostics and history
 yt-cli search "lofi hip hop"
-
-# Diagnóstico del entorno
 yt-cli doctor
-
-# Historial
-yt-cli history
-yt-cli history --failed               # solo lo que falló, con su causa
-yt-cli history export historial.csv --format csv
+yt-cli history --failed               # only what failed, with its cause
+yt-cli history export history.csv --format csv
 ```
 
-Todos los comandos aceptan `--help`. `download` y `audio` detectan solos si la URL es un
-video, una playlist o un canal.
+Every command accepts `--help`. `download` and `audio` detect on their own whether the URL is a video, a playlist or a
+channel.
 
-### Códigos de salida
+<details>
+<summary><b>Exit codes, batch files and filename templates</b></summary>
 
-| Código | Significado |
+| Code | Meaning |
 |---|---|
-| 0 | Todo descargado |
-| 1 | Error (la descarga o colección falló, configuración inválida…) |
-| 2 | Uso incorrecto (opción desconocida, archivo inexistente…) |
-| 3 | Colección completada parcialmente (algunas entradas fallaron) |
-| 130 | Cancelado con Ctrl+C |
+| 0 | Everything downloaded |
+| 1 | Error (the download or collection failed, invalid configuration…) |
+| 2 | Wrong usage (unknown option, missing file…) |
+| 3 | Collection partially completed (some entries failed) |
+| 130 | Cancelled with Ctrl+C |
 
-### Archivo de URLs para `batch`
+A file for `batch`, where lines starting with `#` are ignored:
 
 ```
-# urls.txt — las líneas que empiezan por # se ignoran
+# urls.txt
 https://www.youtube.com/watch?v=aaaaaaaaaaa
 https://music.youtube.com/playlist?list=PLxxxxxxxx
 ```
 
-### Plantillas de nombre de archivo
-
-Placeholders: `{title}` `{uploader}` `{date}` `{id}` `{playlist}` `{resolution}` `{ext}`.
-Solo los `/` de la propia plantilla crean subdirectorios; un `/` en un título no.
+Filename placeholders: `{title}` `{uploader}` `{date}` `{id}` `{playlist}` `{resolution}` `{ext}`. Only the template's own `/`
+create subdirectories; a `/` inside a title doesn't.
 
 ```bash
 yt-cli audio URL --template "{uploader}/{playlist}/{title}.{ext}"
 ```
 
-## Configuración
+</details>
 
-Archivo: `~/.config/yt-cli/config.toml` (o `$XDG_CONFIG_HOME/yt-cli/config.toml`), con
-permisos `0600`. Se modifica con `yt-cli config set <sección>.<clave> <valor>`
-(`none` restablece el valor por defecto) o editándolo a mano.
+&nbsp;
+
+## ⚙️ Configuration
+
+`~/.config/yt-cli/config.toml` (or `$XDG_CONFIG_HOME/yt-cli/config.toml`), with `0600` permissions. Change it with
+`yt-cli config set <section>.<key> <value>` (`none` restores the default) or by hand.
+
+```bash
+yt-cli config set general.download_directory ~/Music
+yt-cli config set downloads.sponsorblock_remove sponsor,selfpromo
+yt-cli config set network.cookies_from_browser firefox
+yt-cli config profile set archive audio_format flac
+yt-cli --profile archive audio "https://youtu.be/XXXXXXXXXXX"
+```
+
+<details>
+<summary><b>A complete config.toml</b></summary>
 
 ```toml
 [general]
 download_directory = "~/Music"
 history_enabled = true
-cache_enabled = true         # cache de resultados de `search`
+cache_enabled = true         # cache for `search` results
 cache_ttl_hours = 24
 
 [downloads]
@@ -152,58 +198,79 @@ overwrite_policy = "skip"    # skip | overwrite | rename
 embed_thumbnail = true
 embed_metadata = true
 embed_chapters = true
-use_download_archive = false # true = como pasar siempre --archive
-sponsorblock_remove = []     # p. ej. ["sponsor", "selfpromo"]
+use_download_archive = false # true = always behave as with --archive
+sponsorblock_remove = []     # e.g. ["sponsor", "selfpromo"]
 
 [network]
 max_concurrent_downloads = 3
 max_concurrent_fragments = 4
 retries = 10
-# proxy = "http://usuario:pass@host:3128"   # se oculta en `config show`
+# proxy = "http://user:pass@host:3128"      # hidden in `config show`
 # rate_limit_kbps = 500
-# cookies_from_browser = "firefox"          # o "chrome:Perfil 1"
+# cookies_from_browser = "firefox"          # or "chrome:Profile 1"
 
-[profiles.archivo]
+[profiles.archive]
 audio_format = "flac"
 audio_quality = "best"
 
-# Opciones adicionales de yt_dlp.YoutubeDL (nombres de la API de Python).
-# Las que yt-cli gestiona internamente (formato, rutas, progreso…) se ignoran.
+# Extra yt_dlp.YoutubeDL options (Python API names).
+# The ones yt-cli manages itself (format, paths, progress…) are ignored.
 [ytdlp]
 geo_bypass_country = "ES"
 ```
 
-```bash
-yt-cli config set general.download_directory ~/Music
-yt-cli config set downloads.sponsorblock_remove sponsor,selfpromo
-yt-cli config set network.cookies_from_browser firefox
-yt-cli config profile set archivo audio_format flac
-yt-cli --profile archivo audio "https://youtu.be/XXXXXXXXXXX"
-```
+</details>
 
-## Actualizar
+&nbsp;
 
-- Paquete de Arch: `git pull` y, dentro de `packaging/`, `makepkg -si`.
-- pipx/uv: `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
-- `yt-cli update` comprueba si hay una versión nueva publicada. `yt-cli self-update` solo
-  actúa si yt-cli se instaló con pip en un entorno propio y si el paquete de PyPI declara
-  este repositorio como origen (ver [SECURITY.md](SECURITY.md)).
+## 🔄 Update
 
-Mantén también yt-dlp al día: YouTube cambia a menudo y una versión vieja es la causa
-más común de fallos (`yt-cli doctor` avisa).
+- Arch package: `git pull`, then `makepkg -si` inside `packaging/`.
+- pipx / uv: `pipx upgrade yt-cli` / `uv tool upgrade yt-cli`.
+- `yt-cli update` checks whether a new version is published. `yt-cli self-update` only acts if yt-cli was installed with pip
+  in its own environment and the PyPI package declares this repository as its source (see [SECURITY.md](SECURITY.md)).
 
-## Desarrollo
+> [!TIP]
+> Keep yt-dlp up to date too: YouTube changes often, and an old yt-dlp is the most common cause of failures
+> (`yt-cli doctor` warns about it).
+
+&nbsp;
+
+## 🛠️ Development
 
 ```bash
-pip install -e . --group dev      # pip ≥ 25.1 (o: uv sync)
+pip install -e . --group dev      # pip ≥ 25.1 (or: uv sync)
 ruff check . && ruff format --check .
 mypy src/
 pytest
 ```
 
-Ver [ARCHITECTURE.md](ARCHITECTURE.md) y [CONTRIBUTING.md](CONTRIBUTING.md).
+&nbsp;
 
-## Licencia
+## 📚 Documentation
 
-MIT. Ver [LICENSE](LICENSE). El usuario es responsable de cumplir los Términos de
-Servicio de YouTube y las leyes de derechos de autor de su jurisdicción.
+| Resource | Description |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | How the code is organized |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+| [FAQ.md](FAQ.md) | Frequent questions |
+| [SECURITY.md](SECURITY.md) | Security policy and `self-update` |
+| [docs/yt-cli.1](docs/yt-cli.1) | Man page |
+| [README.es.md](README.es.md) | This readme in Spanish |
+
+> [!IMPORTANT]
+> You are responsible for complying with YouTube's Terms of Service and the copyright law of your jurisdiction.
+
+&nbsp;
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" alt=""/>
+</p>
+
+<p align="center">
+  Copyright © 2026 <a href="https://github.com/h3n-x">h3n-x</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/h3n-x/yt-cli/blob/main/LICENSE"><img src="https://img.shields.io/static/v1?style=for-the-badge&message=MIT&logoColor=d9e0ee&label=License&labelColor=363a4f&color=a6e3a1" alt="MIT License"/></a>
+</p>
